@@ -1,0 +1,42 @@
+#Eesmärk: See skript loob kasutajale kasutajanime ja parooli, mis põhinevad nende ees- ja perekonnanimel, mida loetakse CSV failist.
+#Autor: artur golubevs
+#Kuupäev: 19.01
+
+#csv fail
+$fail = Read-Host -Prompt "Csv faili nimi: "
+
+#csv faili kontrollimine
+if ($fail -notmatch ".csv$") {
+    Write-Host "Csv faili ei eksisteeri"
+    $fail = Read-Host -Prompt "Csv faili nimi"
+}
+
+#csv faili impordimine muutujasse
+$scriptpath = $MyInvocation.MyCommand.Path
+$dir = Split-Path $scriptpath
+$kasutajad = Import-Csv $dir\$fail
+
+#loo uus massiiv, et salvestada kasutajanimi ja parool
+$result = @()
+
+#tsukkel
+foreach ($kasutaja in $kasutajad) {
+    $eesnimi = $kasutaja.eesnimi
+    $perenimi = $kasutaja.perenimi
+    $kasutajanimi = $eesnimi.Substring(0,1) + $perenimi
+    $parool = $perenimi.Substring(0,1) + $eesnimi + (100..999 | Get-Random)
+    $andmed += "$eesnimi $parool" }
+foreach ($kasutaja in $kasutajad) {
+    if($kasutaja -ne $null) {
+        # Get the first and last name
+        $eesnimi = $kasutaja.FirstName
+        $perenimi = $kasutaja.LastName
+    }
+    else {
+        Write-Host "Error: empty row in the CSV file"
+        continue;
+    }
+}
+
+#tekstifaili tekkitamine
+$andmed | Out-File -FilePath "tulemus.txt"
